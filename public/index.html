@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Compair</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<link href="https://fonts.googleapis.com/css?family=Saira" rel="stylesheet">
+</head>
+<body>
+
+	<div class="header">
+		<strong><font class="Comp">Comp</font><font class="air">air</font></strong>
+	</div>
+
+	<div id="menu">
+		<form name="myForm">
+			<select name="optionList" id="optionList" onchange="handleOption(this.form)">
+				<option value="City">City Name</option>
+				<option value="Zip">Zip Code</option>
+			</select>
+		</form>
+	</div>
+
+	<div id="c1">
+		<input onchange='weatherAsk(1)' id="c1input" type="text" placeholder="Enter 1st City">
+		
+		<div class="flexwrap">			
+
+			<div class="smtext"> Temp 
+				<div id="c1temp" class="bgtext"> </div>
+			</div>
+			<div class="smtext"> Humidity 
+				<div id="c1humid" class="bgtext"> </div>
+			</div>
+			<div class="smtext"> Wind 
+				<div id="c1wind" class="bgtext"> </div>
+			</div>
+			<div class="smtext">
+				<div id="c1icon" class="iconRoom"></div>
+			</div>
+
+		</div>
+
+	</div>
+
+	<div id="c2">
+		<div class="c2flexwrap">
+			<div id="c2temp" class="bgtext"> </div>
+			<div id="c2humid" class="bgtext"> </div>
+			<div id="c2wind" class="bgtext"> </div>
+			<div class="iconRoom"> <img src="arrows.png"> </div>			
+		</div>
+	</div>
+
+	<div id="c3">
+		<input onchange='weatherAsk(3)' id="c3input" type="text" placeholder="Enter 2nd City">
+		<div class="flexwrap">
+
+			<div class="smtext"> Temp 
+				<div id="c3temp" class="bgtext"> </div>
+			</div>
+			<div class="smtext"> Humidity 
+				<div id="c3humid" class="bgtext"> </div>
+			</div>
+			<div class="smtext"> Wind 
+				<div id="c3wind" class="bgtext"> </div>
+			</div>
+				<div id="c3icon" class="iconRoom"></div>
+			</div>
+		</div>
+	</div>
+
+</body>
+<script type="text/javascript" src="script.js"></script>
+</html>
