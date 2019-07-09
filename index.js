@@ -24,7 +24,12 @@ const db = knex({
 });
 
 app.get('/', (req, res) => {
-	res.send('you get that root homie');
+	db.select('*')
+	.from('users')
+	.where({name: 'Max'})
+	.then(user => {
+		res.json(user);
+	})
 })
 
 app.get('/profile/:id', (req, res) => {
