@@ -24,16 +24,57 @@ const db = knex({
 });
 
 app.get('/', (req, res) => {
-	db.select('*')
+	db.select('name', 'email', 'picture', 'id', 'status')
 	.from('users')
-	.where({name: 'Max'})
 	.then(user => {
 		res.json(user);
 	})
 })
 
+/////////////////////////
+/////////////////////////
+
+app.get('/favorites/', (req, res) => {
+	db.select('favorites')
+	.from('users')
+	.where({email: 'max1manley@gmail.com'})
+	.then(user => {
+		if (user.length) {
+			res.json(user)
+		} else {
+			res.status(400).json('not found')
+		}
+	})
+	.catch(err => res.status(400).json('error getting favs'))
+})
+
+/////////////////////////
+
+app.put('/favorites/', (req, res) => {
+	console.log(req.body);
+	db('users')
+	.where('name', req.body.name)
+	.update({
+		favorites: db.raw(`array_append(favorites, '${req.body.putFavorites}')`)
+	})
+	.then(res.json(req.body.putFavorites));
+})
+
+/////////////////////////
+
+app.delete('/favorites/', (req, res) => {
+	db('users')
+	.where('name', req.body.name)
+	.update({
+		favorites: db.raw(`array_remove(favorites, '${req.body.deleteFavorites}')`)
+	})
+	.then(res.json(req.body.deleteFavorites));
+})
+
+/////////////////////////
+/////////////////////////
+
 app.get('/profile/:id', (req, res) => {
-	//knex makin it happin homie
 	db.select('*')
 	.from('users')
 	.where({id: req.params.id})
@@ -48,52 +89,61 @@ app.get('/profile/:id', (req, res) => {
 })
 
 app.post('/register', (req, res) => {
-	
-	bcrypt.genSalt(10, function(err, salt) {
-	    bcrypt.hash(req.body.password, salt, function(err, hash) {
-		db('login')
-		.returning('*')
-		.insert({
-			users: req.body.email,
-			hash: hash,
-		})
-		//Do I need this?
-		.then(	
-			db('users')
+	if(req.body.password 
+	&& req.body.email 
+	&& req.body.name){
+		bcrypt.genSalt(10, function(err, salt) {
+		    bcrypt.hash(req.body.password, salt, function(err, hash) {
+			db('login')
 			.returning('*')
 			.insert({
-				name: req.body.name,
-				email: req.body.email,
-				picture: req.body.picture,
-				joined: new Date(),
+				users: req.body.email,
+				hash: hash,
 			})
-	.then(user => {
-		res.json(user[0]);
-	}))
-		.catch(err => res.status(400).json('unable to register'))	    	
-	    });
-	});
+			.then(	
+				db('users')
+				.returning('*')
+				.insert({
+					name: req.body.name,
+					email: req.body.email,
+					picture: req.body.picture,
+					joined: new Date(),
+				})
+			.then(user => {
+				res.json(user[0]);
+			}))
+			.catch(err => res.status(400).json('unable to register'))	    	
+		    });
+		});		
+	} else {
+		res.json('please fill required fields');
+	}
 })
 
 app.post('/signin', (req, res) => {
-	//yeah still trying to figure this one out
-})
-
-app.put('/addpass', (req, res) => {
-	bcrypt.genSalt(10, function(err, salt) {
-	    bcrypt.hash(req.body.password, salt, function(err, hash) {
-			db('users')
-			.where('email', '=', req.body.email)
-			.update({
-				password: hash,
-			})
-			.then(res.json('addpass success maybe'));
-		})
-	})
+    const { email, password } =req.body;
+    if (!email || !password) {
+       return res.status(400).json('incorrect form submission');
+	}
+    db.select('email', 'hash').from('login')
+    .where('email', '=', email)
+    .then(data => {
+        const isValid = bcrypt.compareSync(password, data[0].hash);
+        if (isValid) {
+            return db.select('*').from('users')
+                .where('email', '=', email)
+                .then(user => {
+                    res.json(user[0])
+                })
+                .catch(err => res.status(400).json('unable to get user'))
+        } else {
+            res.status(400).json('wrong credentials 1')
+        } 
+    })
+    .catch(err => res.status(400).json('wrong credentrials 2'))
 })
 
 app.put('/status', (req, res) => {
-	//knex cracka
 	db('users')
 	.where('name', '=', req.body.name)
 	.update({
@@ -103,7 +153,6 @@ app.put('/status', (req, res) => {
 })
 
 app.put('/picture', (req, res) => {
-	//knex cracka
 	db('users')
 	.where('name', '=', req.body.name)
 	.update({
@@ -112,7 +161,6 @@ app.put('/picture', (req, res) => {
 	.then(res.json('success maybe'));
 })
 
-//process.env.PORT???
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
 	console.log(`server is listening on ${PORT}`)
