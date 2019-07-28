@@ -94,25 +94,26 @@ app.post('/register', (req, res) => {
 	&& req.body.name){
 		bcrypt.genSalt(10, function(err, salt) {
 		    bcrypt.hash(req.body.password, salt, function(err, hash) {
-			db('login')
-			.returning('*')
-			.insert({
-				users: req.body.email,
-				hash: hash,
-			})
-			.then(	
-				db('users')
+				db('login')
 				.returning('*')
 				.insert({
-					name: req.body.name,
 					email: req.body.email,
-					picture: req.body.picture,
-					joined: new Date(),
+					hash: hash,
 				})
-			.then(user => {
-				res.json(user[0]);
-			}))
-			.catch(err => res.status(400).json('unable to register'))	    	
+				.then(	
+					db('users')
+					.returning('*')
+					.insert({
+						name: req.body.name,
+						email: req.body.email,
+						picture: req.body.picture,
+						joined: new Date(),
+					})
+					.then(user => {
+						res.json(user[0]);
+					}
+				))
+				.catch(err => res.status(400).json('unable to register'))	    	
 		    });
 		});		
 	} else {
