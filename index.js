@@ -1,18 +1,21 @@
+//backend frameword
 const express = require('express');
 const app = express();
+//body parsing middleware
 const bodyParser = require('body-parser');
+//SQL querry builder
 const knex = require('knex');
+//creates hash with salt to be stored as password
 const bcrypt = require('bcryptjs');
+//for providing a Connect/Express middleware that can be used to enable CORS with various options
 const cors = require('cors');
 
+//app.use to modify things before an app.get runs AKA "middleware"
 app.use(cors());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
-//app.use to modify things before an app.get runs AKA "middleware"
 
-//to send a static element such as webpage
-//app.use(express.static(__dirname + '/public'));
-
+//connects knex to postgres
 const db = knex({
   client: 'pg',
   connection: {
@@ -23,33 +26,18 @@ const db = knex({
   }
 });
 
-app.get('/', (req, res) => {
-	db.select('name', 'email', 'picture', 'id', 'status')
-	.from('users')
-	.then(user => {
-		res.json(user);
-	})
-})
-
-/////////////////////////
-/////////////////////////
-
-app.get('/favorites/', (req, res) => {
+//for reloading favorites after changes
+app.get('/favorites/:id', (req, res) => {
 	db.select('favorites')
 	.from('users')
-	.where({email: 'max1manley@gmail.com'})
+	.where({name: req.params.id})
 	.then(user => {
-		if (user.length) {
-			res.json(user)
-		} else {
-			res.status(400).json('not found')
-		}
+		res.json(user);
 	})
 	.catch(err => res.status(400).json('error getting favs'))
 })
 
-/////////////////////////
-
+//adds to favorites
 app.put('/favorites/', (req, res) => {
 	console.log(req.body);
 	db('users')
@@ -60,8 +48,7 @@ app.put('/favorites/', (req, res) => {
 	.then(res.json(req.body.putFavorites));
 })
 
-/////////////////////////
-
+//deletes from favorites
 app.delete('/favorites/', (req, res) => {
 	db('users')
 	.where('name', req.body.name)
@@ -71,23 +58,7 @@ app.delete('/favorites/', (req, res) => {
 	.then(res.json(req.body.deleteFavorites));
 })
 
-/////////////////////////
-/////////////////////////
-
-app.get('/profile/:id', (req, res) => {
-	db.select('*')
-	.from('users')
-	.where({id: req.params.id})
-	.then(user => {
-		if (user.length) {
-			res.json(user[0])
-		} else {
-			res.status(400).json('not found')
-		}
-	})
-	.catch(err => res.status(400).json('error getting user'))
-})
-
+//registers new user
 app.post('/register', (req, res) => {
 	if(req.body.password 
 	&& req.body.email 
@@ -106,7 +77,6 @@ app.post('/register', (req, res) => {
 					.insert({
 						name: req.body.name,
 						email: req.body.email,
-						picture: req.body.picture,
 						joined: new Date(),
 					})
 					.then(user => {
@@ -121,8 +91,9 @@ app.post('/register', (req, res) => {
 	}
 })
 
+//signs you in
 app.post('/signin', (req, res) => {
-    const { email, password } =req.body;
+    const { email, password } = req.body;
     if (!email || !password) {
        return res.status(400).json('incorrect form submission');
 	}
@@ -144,25 +115,8 @@ app.post('/signin', (req, res) => {
     .catch(err => res.status(400).json('wrong credentrials 2'))
 })
 
-app.put('/status', (req, res) => {
-	db('users')
-	.where('name', '=', req.body.name)
-	.update({
-		status: req.body.status
-	})
-	.then(res.json('success maybe'));
-})
-
-app.put('/picture', (req, res) => {
-	db('users')
-	.where('name', '=', req.body.name)
-	.update({
-		picture: req.body.picture
-	})
-	.then(res.json('success maybe'));
-})
-
+//enviormental variables
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-	console.log(`server is listening on ${PORT}`)
+	console.log(`ExpressJsTest is listening on ${PORT}`)
 });
