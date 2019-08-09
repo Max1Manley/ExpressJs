@@ -26,6 +26,11 @@ const db = knex({
   }
 });
 
+//I am root
+app.get('/', (req, res) => {
+	res.json('I am root');
+})
+
 //for reloading favorites after changes
 app.get('/favorites/:id', (req, res) => {
 	db.select('favorites')
