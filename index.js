@@ -1,3 +1,5 @@
+//heroku pg:psql in cmdline to view and alter database data.
+
 //backend frameword
 const express = require('express');
 const app = express();
