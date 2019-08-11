@@ -1,4 +1,4 @@
-//heroku pg:psql in cmdline to view and alter database data.
+//heroku pg:psql in cmdline to view and edit database data.
 
 //backend frameword
 const express = require('express');
@@ -32,6 +32,7 @@ app.get('/', (req, res) => {
 })
 
 //for reloading favorites after changes
+//says :id but is actually using userData.name because :name wouldn't work
 app.get('/favorites/:id', (req, res) => {
 	db.select('favorites')
 	.from('users')
@@ -63,7 +64,7 @@ app.delete('/favorites/', (req, res) => {
 	.then(res.json(req.body.deleteFavorites));
 })
 
-//registers new user
+//registers new user + hash and salt on password before being saved as hash in seperate table
 app.post('/register', (req, res) => {
 	if(req.body.password 
 	&& req.body.email 
@@ -96,7 +97,7 @@ app.post('/register', (req, res) => {
 	}
 })
 
-//signs you in
+//signs you in, converts password to hash and compares to saved hash
 app.post('/signin', (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
